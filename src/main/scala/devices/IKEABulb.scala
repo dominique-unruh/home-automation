@@ -17,31 +17,8 @@ import scala.compiletime.uninitialized
 import scala.concurrent.duration.Duration
 
 /** https://www.zigbee2mqtt.io/devices/LED2109G6.html **/
-class IKEABulb(topic: String)(using mqtt: Mqtt) extends OnOff, Colored, Identify {
-  val state: Observable[State] = {
-    val subject = BehaviorSubject[State](null)
-    mqtt.subscribe(topic)
-      .map((topic, message) => read[IKEABulb.State](message.getPayload))
-      .subscribe(subject)
-    subject
-  }
-
-
-  mqtt.publish(s"$topic/get", """{"state": ""}""")
-
-//  private var state: State = uninitialized
-//  mqtt.subscribe(topic, subscriptionListener)
-//  mqtt.publish(s"$topic/get", """{"state": ""}""")
-
-//  private def getState: State =
-//    if (state == null) throw IllegalStateException("State unknown")
-//    else state
-
-//  private def subscriptionListener(topic: String, payload: String): Unit =
-//    state = read[IKEABulb.State](payload)
-
-  def setRaw(subtopic: String, value: String): Unit =
-    mqtt.publish(if (subtopic != "") s"$topic/set/$subtopic" else s"$topic/set", value)
+class IKEABulb(topic: String)(using mqtt: Mqtt)
+  extends Zigbee2Mqtt[IKEABulb.State](topic), OnOff, Colored, Identify {
 
   override def setOn(state: Boolean): Unit =
     setRaw("state", if (state) "ON" else "OFF")
@@ -66,6 +43,6 @@ class IKEABulb(topic: String)(using mqtt: Mqtt) extends OnOff, Colored, Identify
 }
 
 object IKEABulb {
-  case class State(brightness: Int, state: String) derives ReadWriter
+  protected case class State(brightness: Int, state: String) derives ReadWriter
   private case class ColorRGB(r: Int, g: Int, b: Int) derives ReadWriter
 }
