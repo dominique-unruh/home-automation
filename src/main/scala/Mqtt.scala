@@ -8,7 +8,10 @@ import monix.reactive.observers.Subscriber
 import org.eclipse.paho.mqttv5.client.{IMqttMessageListener, IMqttToken, MqttClient, MqttConnectionOptions}
 import org.eclipse.paho.mqttv5.common.{MqttMessage, MqttSubscription}
 
+import java.util
+
 class Mqtt {
+  private val subscriptions = util.HashSet[String]()
   private val client = {
     val clientId = "de.unruh.homeautomation"
     val client = new MqttClient("tcp://quietscheentchen:1883", clientId)
@@ -26,6 +29,8 @@ class Mqtt {
   }
 
   def subscribe(topic: String): Observable[(String, MqttMessage)] = {
+    assert(!subscriptions.contains(topic))
+    subscriptions.add(topic)
     def f(subscriber: Subscriber.Sync[(String, MqttMessage)]): Cancelable = {
       val subscriptionToken = client.subscribe(
         Array(MqttSubscription(topic)),
