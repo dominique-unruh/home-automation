@@ -1,9 +1,11 @@
 package de.unruh.homeautomation
 package interfaces
 
+import monix.reactive.Observable
+
 import java.awt.Color
 
 trait Colored {
   def setColor(color: Color): Unit
-  // TODO: val color : Observable[Color]
+  val color : Observable[Color]
 }
