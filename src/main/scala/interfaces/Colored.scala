@@ -7,5 +7,5 @@ import java.awt.Color
 
 trait Colored {
   def setColor(color: Color): Unit
-  val color : Observable[Color]
+  lazy val color : Observable[Color]
 }

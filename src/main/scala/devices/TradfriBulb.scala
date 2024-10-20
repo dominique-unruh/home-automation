@@ -2,7 +2,7 @@ package de.unruh.homeautomation
 package devices
 
 import TradfriBulb.*
-import interfaces.{Colored, Identify, OnOff}
+import interfaces.{Brightness, ColorTemperature, Colored, Identify, OnOff}
 
 import monix.execution.Cancelable
 import monix.execution.ChannelType.MultiProducer
@@ -20,7 +20,19 @@ import scala.concurrent.duration.Duration
 /** https://www.zigbee2mqtt.io/devices/LED2109G6.html **/
 class TradfriBulb(topic: String)(using mqtt: Mqtt)
   extends Zigbee2Mqtt[TradfriBulb.State](topic, "state"),
-    OnOff, Colored, Identify {
+    OnOff, Colored, Identify, Brightness, ColorTemperature {
+
+  override def setColorTemperature(temperature: Double): Unit = {
+    val mired = ColorTemperature.kelvinToMired(temperature).toInt match {
+      case mired if mired < 250 => 250
+      case mired if mired > 454 => 454
+      case mired => mired
+    }
+    setRaw("color_temp", mired.toString)
+  }
+
+  override lazy val colorTemperature: Observable[Double] =
+    state.map { s => ColorTemperature.miredToKelvin(s.color_temp) }
 
   override def setOn(state: Boolean): Unit =
     setRaw("state", if (state) "ON" else "OFF")
@@ -28,37 +40,35 @@ class TradfriBulb(topic: String)(using mqtt: Mqtt)
   override def toggle(): Unit =
     setRaw("state", "TOGGLE")
 
-  override val isOn: Observable[Boolean] =
-    state.map { s => s.state match {
+  override lazy val isOn: Observable[Boolean] =
+    state.map { _.state match {
       case "ON" => true
       case "OFF" => false
     }}
+
+  override def setBrightness(brightness: Double): Unit = {
+    setRaw("brightness", (brightness * 254).toInt.toString)
+  }
+
+  override lazy val brightness: Observable[Double] =
+    state.map { s => s.brightness / 254.0 }
 
   override def identify(): Unit =
     setRaw("identify", "identify")
 
 
   override def setColor(color: Color): Unit = {
-/*
-    val color2 = ColorRGB(color.getRed, color.getGreen, color.getBlue)
+    val xyz = xyzColorSpace.fromRGB(color.getRGBComponents(null))
+    val sum = xyz(0) + xyz(1) + xyz(2)
+    val x = xyz(0) / sum
+    val y = xyz(1) / sum
+    val color2 = ColorXY(x,y)
     val json = upickle.default.write(color2)
     mqtt.publish(s"$topic/set/color", json)
-*/
-
-        val xyz = xyzColorSpace.fromRGB(color.getRGBComponents(null))
-        val sum = xyz(0) + xyz(1) + xyz(2)
-        val x = xyz(0) / sum
-        val y = xyz(1) / sum
-        val color2 = ColorXY(x,y)
-        println(color2)
-        val json = upickle.default.write(color2)
-        mqtt.publish(s"$topic/set/color", json)
-
   }
 
-  override val color: Observable[Color] =
+  override lazy val color: Observable[Color] =
     state.map { s =>
-//      Color.getHSBColor(s.color.hue / 360f, s.color.saturation / 100f, .3f)
       val Y = .2f
       val z = 1 - s.color.x - s.color.y
       val Array(r,g,b) = xyzColorSpace.toRGB(Array(Y * s.color.x, Y * s.color.y, Y * z))
@@ -77,9 +87,9 @@ class TradfriBulb(topic: String)(using mqtt: Mqtt)
 }
 
 object TradfriBulb {
-  protected case class State(brightness: Int, state: String, color: ColorXY) derives ReadWriter
+  protected case class State(brightness: Int, state: String, color: ColorXY, color_temp: Int) derives ReadWriter
   protected case class ColorXY(x: Float, y: Float) derives ReadWriter
-  protected case class ColorHS(hue: Int, saturation: Int) derives ReadWriter
-  private case class ColorRGB(r: Int, g: Int, b: Int) derives ReadWriter
+//  protected case class ColorHS(hue: Int, saturation: Int) derives ReadWriter
+//  private case class ColorRGB(r: Int, g: Int, b: Int) derives ReadWriter
   private val xyzColorSpace = ColorSpace.getInstance(ColorSpace.CS_CIEXYZ)
 }
