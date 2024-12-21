@@ -5,19 +5,27 @@ import monix.execution.Cancelable
 import monix.execution.ChannelType.MultiProducer
 import monix.reactive.{Observable, OverflowStrategy}
 import monix.reactive.observers.Subscriber
-import org.eclipse.paho.mqttv5.client.{IMqttMessageListener, IMqttToken, MqttClient, MqttConnectionOptions}
-import org.eclipse.paho.mqttv5.common.{MqttMessage, MqttSubscription}
+import org.eclipse.paho.client.mqttv3.{MqttClient, MqttConnectOptions, MqttMessage}
 
+import java.io.{BufferedReader, FileInputStream, FileReader}
 import java.util
+import scala.io.BufferedSource
+import scala.util.Using
 
 class Mqtt {
   private val subscriptions = util.HashSet[String]()
   private val client = {
     val clientId = "de.unruh.homeautomation"
-    val client = new MqttClient("tcp://quietscheentchen:1883", clientId)
-    val options = new MqttConnectionOptions()
+    val client = new MqttClient("tcp://djinn:1883", clientId)
+    val options = new MqttConnectOptions()
     options.setAutomaticReconnect(true)
     options.setConnectionTimeout(10)
+    val Seq(username, password) =
+      Using(new BufferedSource(new FileInputStream(".mqtt-credentials.secret"))) {
+        source => source.getLines()
+      }.get.toSeq
+    options.setUserName(username)
+    options.setPassword(password.toCharArray)
     client.connect(options)
     client
   }
@@ -31,28 +39,17 @@ class Mqtt {
   def subscribe(topic: String): Observable[(String, MqttMessage)] = {
     assert(!subscriptions.contains(topic))
     subscriptions.add(topic)
+    def unsubscribe(): Unit = client.unsubscribe(topic)
     def f(subscriber: Subscriber.Sync[(String, MqttMessage)]): Cancelable = {
-      val subscriptionToken = client.subscribe(
-        Array(MqttSubscription(topic)),
-        Array[IMqttMessageListener]((topic: String, message: MqttMessage) => {
+      client.subscribe(
+        topic,
+        (topic: String, message: MqttMessage) => {
           val response = subscriber.onNext((topic, message))
           if (response == Stop)
-            {} // No way to unsubscribe?
-        }))
-      () => () // No way to unsubscribe?
+            unsubscribe()
+        })
+      () => unsubscribe()
     }
     Observable.create(OverflowStrategy.DropOld(2), MultiProducer)(f)
   }
-
-/*  def subscribe(topic: String, callback: (String, String) => Unit): IMqttToken = {
-    client.subscribe(
-      Array(MqttSubscription(topic)),
-      Array[IMqttMessageListener]((topic: String, message: MqttMessage) => {
-        try {
-          callback(topic, String(message.getPayload))
-        } catch
-          case e: Throwable =>
-            e.printStackTrace()
-      }))
-  }*/
 }
