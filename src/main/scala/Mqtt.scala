@@ -6,8 +6,9 @@ import monix.execution.ChannelType.MultiProducer
 import monix.reactive.{Observable, OverflowStrategy}
 import monix.reactive.observers.Subscriber
 import org.eclipse.paho.client.mqttv3.{MqttClient, MqttConnectOptions, MqttMessage}
+import org.apache.commons.io.FileUtils
 
-import java.io.{BufferedReader, FileInputStream, FileReader}
+import java.io.{BufferedReader, File, FileInputStream, FileReader}
 import java.util
 import scala.io.BufferedSource
 import scala.util.Using
@@ -21,7 +22,7 @@ class Mqtt {
     options.setAutomaticReconnect(true)
     options.setConnectionTimeout(10)
     val Seq(username, password) =
-      Using(new BufferedSource(new FileInputStream(".mqtt-credentials.secret"))) {
+      Using(new BufferedSource(new FileInputStream(File(FileUtils.getUserDirectory, ".mqtt-credentials.secret")))) {
         source => source.getLines()
       }.get.toSeq
     options.setUserName(username)

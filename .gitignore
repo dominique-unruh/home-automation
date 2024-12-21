@@ -45,5 +45,8 @@ build/
 
 ### Scala ###
 .bsp/
+
+
+
 /deunruhhomeautomation/.lck
 /.mqtt-credentials.secret
