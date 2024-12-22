@@ -11,7 +11,7 @@ import java.net.InetSocketAddress
 
 object Server {
   def main(args: Array[String]): Unit = {
-    Controller.startAsThread()
+    Controller.run()
     val server = new Server(InetSocketAddress("localhost",8082))
     val context = new WebAppContext()
     context.setBaseResource(DummyResource)

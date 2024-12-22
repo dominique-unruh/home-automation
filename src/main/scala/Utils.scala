@@ -12,5 +12,12 @@ object Utils {
   def peek[A](observable: Observable[A], duration: Duration = Duration("10s")): A =
     observable.firstL.runSyncUnsafe(duration)
   def onChange[A](observable: Observable[A], callback: A => Unit): Cancelable =
-    observable.subscribe(a => Future { callback(a); Ack.Continue })
+    observable.subscribe(a => Future {
+      try {
+        callback(a)
+      } catch {
+        case e: Throwable => e.printStackTrace()
+      }
+      Ack.Continue
+    })
 }
