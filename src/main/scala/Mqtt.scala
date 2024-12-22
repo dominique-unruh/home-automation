@@ -9,6 +9,7 @@ import org.eclipse.paho.client.mqttv3.{MqttClient, MqttConnectOptions, MqttMessa
 import org.apache.commons.io.FileUtils
 
 import java.io.{BufferedReader, File, FileInputStream, FileReader}
+import java.net.InetAddress
 import java.util
 import scala.io.BufferedSource
 import scala.util.Using
@@ -17,7 +18,7 @@ class Mqtt {
   private val subscriptions = util.HashSet[String]()
   private val client = {
     println(s"######## MQTT CLIENT, ${this.hashCode()}")
-    val clientId = "de.unruh.homeautomation"
+    val clientId = s"de.unruh.homeautomation-${InetAddress.getLocalHost.getHostName}"
     val client = new MqttClient("tcp://djinn:1883", clientId)
     val options = new MqttConnectOptions()
     options.setAutomaticReconnect(true)
@@ -35,12 +36,12 @@ class Mqtt {
 //  subscribe("#", (topic, msg) => println(s"Received @ $topic: $msg")) // Logging
 
   def publish(topic: String, payload: String): Unit = {
-    println(s"######## MQTT PUBLISH, ${this.hashCode()}")
+//    println(s"######## MQTT PUBLISH, ${this.hashCode()}")
     client.publish(topic, payload.getBytes, 0, false)
   }
 
   def subscribe(topic: String): Observable[(String, MqttMessage)] = {
-    println(s"######## MQTT SUBSCRIBE, ${this.hashCode()}")
+//    println(s"######## MQTT SUBSCRIBE, ${this.hashCode()}")
     assert(!subscriptions.contains(topic))
     subscriptions.add(topic)
     def unsubscribe(): Unit = client.unsubscribe(topic)
@@ -48,6 +49,7 @@ class Mqtt {
       client.subscribe(
         topic,
         (topic: String, message: MqttMessage) => {
+//          println(s"Got MQTT message: $message")
           val response = subscriber.onNext((topic, message))
           if (response == Stop)
             unsubscribe()

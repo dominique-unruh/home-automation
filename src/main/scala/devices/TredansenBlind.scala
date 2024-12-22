@@ -26,8 +26,9 @@ class TredansenBlind(topic: String, window: OpenClosed)(using mqtt: Mqtt)
 
   Utils.onChange(window.isOpen, isOpen =>
     println(s"Blind got window change: $isOpen")
-    if (isOpen)
-      setPosition(1)
+    // Doesn't work well:
+//    if (isOpen)
+//      setPosition(1)
     windowOpen = isOpen
   )
 

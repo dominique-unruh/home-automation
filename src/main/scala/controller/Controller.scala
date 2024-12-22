@@ -25,10 +25,12 @@ object Controller extends Runnable {
       case e: Throwable =>
         e.printStackTrace()
         throw e
-    } finally {
-      println("Controller exited")
-      running = false
     }
+  }
+
+  def startAsThread() : Unit = {
+    val thread = new Thread(this, "controller")
+    thread.start()
   }
 
   private def code(): Unit = {
@@ -38,17 +40,29 @@ object Controller extends Runnable {
         bedroomCeilingLight.setOn(true)
       }
     })
-
-    onChange(bedroomCeilingLight.isOn, { on =>
-      println(s"Bedroom light: $on")
-      Console.err.println(s"Bedroom light: $on")
-    })
-
-    Thread.sleep(10000000)
   }
 
-  def startAsThread() : Unit = {
-    val thread = new Thread(this, "controller")
-    thread.run()
+  def darknessCozyroom(): Unit = {
+    assertRunning()
+    floodlightTop.setOn(false)
+    floodlightSide.setOn(false)
+    varmblixt.setOn(false)
+  }
+
+  def darknessBedroom(): Unit = {
+    assertRunning()
+    bedroomCeilingLight.setOn(false)
+  }
+
+  def darknessLivingroom(): Unit = {
+    assertRunning()
+    livingroomCeilingLightLeft.setOn(false)
+    livingroomCeilingLightRight.setOn(false)
+  }
+
+  def darkness(): Unit = {
+    darknessBedroom()
+    darknessCozyroom()
+    darknessLivingroom()
   }
 }

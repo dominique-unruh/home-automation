@@ -48,6 +48,5 @@ build/
 
 
 
-/deunruhhomeautomation/.lck
-/deunruhhomeautomation-tcpdjinn1883/.lck
+/deunruhhomeautomation-*/.lck
 /.mqtt-credentials.secret

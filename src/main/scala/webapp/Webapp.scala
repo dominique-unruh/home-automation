@@ -4,6 +4,8 @@ package webapp
 import org.scalatra.{Route, ScalatraServlet, UrlGeneratorSupport}
 import MyDevices.*
 
+import de.unruh.homeautomation.controller.Controller
+
 import java.io.{PrintWriter, StringWriter}
 import scala.xml.NodeBuffer
 
@@ -16,9 +18,9 @@ class Webapp extends ScalatraServlet, UrlGeneratorSupport {
       writer.toString
   }
 
-  private val bedroomLightOn = get("/bedroom/light/on") {
-    bedroomCeilingLight.setOn(true)
-    <b>Switched on bedroom light</b>
+  private val bedroomLightToggle = get("/bedroom/light/toggle") {
+    bedroomCeilingLight.toggle()
+    <b>Toggled bedroom light</b>
   }
 
   private val bedroomBlindsPosition = get("/bedroom/blinds/position/:pos") {
@@ -26,10 +28,21 @@ class Webapp extends ScalatraServlet, UrlGeneratorSupport {
     <b>Put blinds to {params("pos")}%</b>
   }
 
-  get("/fail") {
-    ???
+  private val darknessCozyroom = get("/cozyroom/darkness") {
+    Controller.darknessCozyroom()
   }
 
+  private val darknessBedroom = get("/bedroom/darkness") {
+    Controller.darknessBedroom()
+  }
+
+  private val darknessLivingroom = get("/livingroom/darkness") {
+    Controller.darknessLivingroom()
+  }
+  
+  private val darkness = get("/darkness") {
+    Controller.darkness()
+  }
 
   get("/") {
     def item(route: Route, params: (String, String)*) = {
@@ -43,10 +56,13 @@ class Webapp extends ScalatraServlet, UrlGeneratorSupport {
       </head>
       <body>
         <ul>
-          <li>Test</li>
-          {item(bedroomLightOn)}
+          {item(bedroomLightToggle)}
+          {item(darknessBedroom)}
+          {item(darknessCozyroom)}
+          {item(darknessLivingroom)}
+          {item(darkness)}
           {item(bedroomBlindsPosition, "pos" -> "100")}
-          {item(bedroomBlindsPosition, "pos" -> "95")}
+          {item(bedroomBlindsPosition, "pos" -> "0")}
         </ul>
       </body>
     </html>

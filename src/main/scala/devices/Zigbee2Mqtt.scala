@@ -27,6 +27,7 @@ trait Zigbee2Mqtt[State >: Null : Reader](topic: String,
     subject.filterNot(_ == null)
   }
 
-  def setRaw(subtopic: String, value: String): Unit =
+  def setRaw(subtopic: String, value: String): Unit = {
     mqtt.publish(if (subtopic != "") s"$topic/set/$subtopic" else s"$topic/set", value)
+  }
 }

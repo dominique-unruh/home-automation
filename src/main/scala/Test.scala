@@ -15,22 +15,6 @@ import scala.concurrent.duration.Duration
 
 
 object Test {
-  def darknessCozyroom(): Unit = {
-    floodlightTop.setOn(false)
-    floodlightSide.setOn(false)
-    varmblixt.setOn(false)
-  }
-  
-  def darknessBedroom(): Unit = {
-    bedroomCeilingLight.setOn(false)
-  }
-  
-  def darknessLivingroom(): Unit = {
-    livingroomCeilingLightLeft.setOn(false)
-    livingroomCeilingLightRight.setOn(false)
-  }
-  
-  
   var pingNo = 0
   def ping() = synchronized {
     pingNo += 1
@@ -53,35 +37,35 @@ object Test {
       }})
 */
 
-    blindsBedroom.setPosition(0.9)
+//    blindsBedroom.setPosition(0.9)
 
 
-    /*
-        bedroomCeilingLight.setOn(true)
 
-        ping()
+    bedroomCeilingLight.setOn(true)
 
-        onChange(remote1.action,
-          action => println(s"ACTION:$action"))
+    ping()
 
-        ping()
+    onChange(remote1.action,
+      action => println(s"ACTION:$action"))
 
-        onChange(windowBedroom.isOpen, { open =>
-          println(s"Setting light ${!open}")
-          bedroomCeilingLight.setOn(!open)
-        })
+    ping()
 
-        ping()
+    onChange(windowBedroom.isOpen, { open =>
+      println(s"Setting light ${!open}")
+      bedroomCeilingLight.setOn(!open)
+    })
 
-        onChange(bedroomCeilingLight.colorTemperature,
-          t => println(s"Color temp: ${t}"))
+    ping()
 
-        ping()
-        bedroomCeilingLight.setOn(true)
-        ping()
-        bedroomCeilingLight.colorLoop(true)
-        ping()
-    */
+    onChange(bedroomCeilingLight.colorTemperature,
+      t => println(s"Color temp: ${t}"))
+
+    ping()
+    bedroomCeilingLight.setOn(true)
+    ping()
+    bedroomCeilingLight.colorLoop(true)
+    ping()
+
 //    bedroomCeilingLight.setBrightness(1)
 //    bedroomCeilingLight.setColorTemperature(3154)
 //    Thread.sleep(1000)
