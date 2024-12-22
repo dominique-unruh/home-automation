@@ -14,10 +14,15 @@ lazy val root = (project in file("."))
     idePackagePrefix := Some("de.unruh.homeautomation"),
     resolvers += Resolver.jcenterRepo,
     //        libraryDependencies += "org.eclipse.paho" % "org.eclipse.paho.mqttv5.client" % "1.2.5",
-    libraryDependencies += "org.eclipse.paho" % "org.eclipse.paho.client.mqttv3" % "1.2.5",
-    libraryDependencies += "com.lihaoyi" %% "upickle" % "4.0.2",
-    libraryDependencies += "io.monix" %% "monix-reactive" % "3.4.1",
-    libraryDependencies += "commons-io" % "commons-io" % "2.18.0"
+    libraryDependencies ++= Seq(
+      "org.eclipse.paho" % "org.eclipse.paho.client.mqttv3" % "1.2.5",
+      "com.lihaoyi" %% "upickle" % "4.0.2",
+      "io.monix" %% "monix-reactive" % "3.4.1",
+      "commons-io" % "commons-io" % "2.18.0",
+      "org.scalatra" %% "scalatra-jakarta" % "3.1.1",
+      "org.eclipse.jetty" % "jetty-server" % "12.0.16",
+      "org.slf4j" % "slf4j-simple" % "2.0.16",
+    )
   )
 
 lazy val installOnDjinn = taskKey[Unit]("Install the package on djinn")

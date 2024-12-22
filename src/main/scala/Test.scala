@@ -44,12 +44,16 @@ object Test {
 
 //    darknessCozyroom()
 
+/*
 
     onChange(windowBedroom.isOpen, { open =>
       if (open) {
-        println(s"Bedroom window open, activating light")
-        bedroomCeilingLight.setOn(true)
+        println(s"Bedroom window open, opening blinds")
+        blindsBedroom.setPosition(1)
       }})
+*/
+
+    blindsBedroom.setPosition(0.9)
 
 
     /*
