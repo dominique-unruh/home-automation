@@ -2,13 +2,13 @@ package de.unruh.homeautomation
 package devices
 
 import upickle.default.ReadWriter
-import interfaces.{Battery, Identify, OpenClosed}
+import interfaces.{Battery, Description, Identify, OpenClosed}
 
 import monix.reactive.Observable
 
 /** https://www.zigbee2mqtt.io/devices/E2013.html */
-class ParasollDoorWindowSensor(topic: String)(using Mqtt)
-  extends Zigbee2Mqtt[ParasollDoorWindowSensor.State](topic, "battery"), Identify, OpenClosed, Battery {
+class ParasollDoorWindowSensor(topic: String, description: String)(using Mqtt)
+  extends Zigbee2Mqtt[ParasollDoorWindowSensor.State](topic, "battery"), Identify, OpenClosed, Battery, Description(description) {
   override def identify(): Unit =
     setRaw("identify", "identify")
 

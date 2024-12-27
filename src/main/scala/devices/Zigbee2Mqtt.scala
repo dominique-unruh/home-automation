@@ -3,10 +3,10 @@ package devices
 
 import devices.TradfriBulb.State
 
+import de.unruh.homeautomation.interfaces.Description
 import monix.reactive.Observable
 import monix.reactive.subjects.BehaviorSubject
 import upickle.default.{Reader, read}
-
 import monix.execution.Scheduler.Implicits.global
 
 /** Standard implementation for Zigbee2Mqtt devices.

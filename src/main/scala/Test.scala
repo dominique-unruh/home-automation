@@ -1,6 +1,6 @@
 package de.unruh.homeautomation
 
-import MyDevices.*
+import MyDevices.{mqtt, *}
 import Utils.{onChange, peek}
 
 import monix.execution.{Ack, Cancelable}
@@ -22,7 +22,12 @@ object Test {
   }
   
   def main(args: Array[String]): Unit = {
-    ping()
+
+//    val sub = MyDevices.mqtt.subscribe("SleepAsAndroid")
+
+    onChange(sleepAsAndroid.alarmRescheduled, println)
+
+//    onChange(sub, println)
 
 //    MyDevices.floodlightTop.colorLoop(true)
 
@@ -40,6 +45,7 @@ object Test {
 //    blindsBedroom.setPosition(0.9)
 
 
+/*
 
     bedroomCeilingLight.setOn(true)
 
@@ -65,6 +71,7 @@ object Test {
     ping()
     bedroomCeilingLight.colorLoop(true)
     ping()
+*/
 
 //    bedroomCeilingLight.setBrightness(1)
 //    bedroomCeilingLight.setColorTemperature(3154)
