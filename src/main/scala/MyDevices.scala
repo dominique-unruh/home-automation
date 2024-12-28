@@ -1,6 +1,6 @@
 package de.unruh.homeautomation
 
-import devices.{ParasollDoorWindowSensor, RodretRemote, SleepAsAndroid, TradfriBulb, TredansenBlind, TretaktPlug}
+import devices.{ParasollDoorWindowSensor, RodretRemote, SleepAsAndroid, SonoffThermostat, TradfriBulb, TredansenBlind, TretaktPlug}
 
 import de.unruh.homeautomation.interfaces.{Description, OpenClosed}
 
@@ -20,4 +20,5 @@ object MyDevices {
   val blindsBedroom = TredansenBlind("zigbee2mqtt/blinds_bedroom", windowBedroom)
   val windows: Seq[OpenClosed & Description] = Seq(windowBedroom)
   val sleepAsAndroid: SleepAsAndroid.type = SleepAsAndroid
+  val heatingBedroom = SonoffThermostat("zigbee2mqtt/heating_bedroom")
 }

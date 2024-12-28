@@ -96,6 +96,11 @@ object Controller extends Runnable {
   def sleep() : Unit = {
     darkness()
     blindsBedroom.setPosition(0)
+    allHeatingsTo(16)
+  }
+
+  def allHeatingsTo(temperature: Double): Unit = {
+    heatingBedroom.setTargetTemperature(temperature)
   }
 
   def leave(): Seq[Node] = {
@@ -106,6 +111,7 @@ object Controller extends Runnable {
         if (peekOption(window.isOpen, Duration("1s")).getOrElse(false))
           problems.append(xml.Text(s"${window.description} is open."))
       }
+      allHeatingsTo(16)
     } catch {
       case e: Throwable =>
         problems.append(<pre>{Utils.stackTrace(e)}</pre>)
