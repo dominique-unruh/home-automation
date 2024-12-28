@@ -23,9 +23,9 @@ object Controller extends Runnable {
     // When setting an alarm, put the flat in sleep mode
     onChange(sleepAsAndroid.alarmRescheduled,
       event => if (event.activated) {
-      println("Alarm scheduled ==> putting flat to sleep")
-      sleep()
-    })
+        println("Alarm scheduled ==> putting flat to sleep")
+        sleep()
+      })
 
     // When the alarm rings, open the blinds
     onChange(sleepAsAndroid.alarmStart, event => {

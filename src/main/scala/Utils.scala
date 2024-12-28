@@ -1,15 +1,21 @@
 package de.unruh.homeautomation
 
+import monix.execution.ChannelType.MultiProducer
 import monix.execution.{Ack, Cancelable}
-import monix.reactive.Observable
+import monix.reactive.{Observable, OverflowStrategy}
 
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 import monix.execution.Scheduler.Implicits.global
+import monix.reactive.observers.Subscriber
+import org.eclipse.paho.client.mqttv3.MqttMessage
+import org.reactivestreams.Publisher
 
 import java.awt.Color
 import java.io.{PrintWriter, StringWriter}
-import java.util.concurrent.TimeoutException
+import java.util.concurrent.{ConcurrentLinkedDeque, TimeoutException}
+import scala.collection.JavaConverters.asScalaIteratorConverter
+import scala.compiletime.uninitialized
 import scala.util.Random
 
 object Utils {
@@ -56,5 +62,18 @@ object Utils {
         }
       }
     }
+  }
+
+  class ImperativeObservable[A] {
+    private val subscribers = ConcurrentLinkedDeque[Subscriber.Sync[A]]()
+    val observable: Observable[A] = Observable.create(OverflowStrategy.DropOld(2), MultiProducer) { subscriber =>
+      println(s"Adding subscriber $subscriber")
+      subscribers.add(subscriber)
+      () => subscribers.remove(subscriber)
+    }
+
+    def publish(message: A): Unit = 
+      for (subscriber <- subscribers.iterator.asScala)
+        subscriber.onNext(message)
   }
 }

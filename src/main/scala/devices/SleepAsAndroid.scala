@@ -2,19 +2,25 @@ package de.unruh.homeautomation
 package devices
 
 import devices.SleepAsAndroid.{AlarmDismissEvent, AlarmRescheduledEvent, AlarmStartEvent, Message}
-import monix.reactive.Observable
+
+import de.unruh.homeautomation.Utils.ImperativeObservable
+import monix.execution.ChannelType.MultiProducer
+import monix.reactive.{Observable, OverflowStrategy}
 import monix.reactive.subjects.BehaviorSubject
 import upickle.default.{ReadWriter, Reader, read}
 import monix.execution.Scheduler.Implicits.global
+import org.reactivestreams.Publisher
 
-class SleepAsAndroid(topic: String)(implicit mqtt: Mqtt) {
-  protected val state: Observable[Message] = {
-    val subject = BehaviorSubject[Message](null)
-    mqtt.subscribe(topic)
-      .map((topic, message) => read[Message](message.getPayload))
-      .subscribe(subject)
-    subject.filterNot(_ == null)
+object SleepAsAndroid {
+  private val imperativeObservable = ImperativeObservable[Message]()
+
+  def incomingWebhook(json: String): Unit = {
+    println(s"Sleep as android webhook: ${json}")
+    val message = read[Message](json)
+    imperativeObservable.publish(message)
   }
+
+  val state: Observable[Message] = imperativeObservable.observable
 
   Utils.onChange(state, println)
 
@@ -29,13 +35,13 @@ class SleepAsAndroid(topic: String)(implicit mqtt: Mqtt) {
   val alarmDismiss: Observable[AlarmDismissEvent] = state
     .filter(_.event == "alarm_alert_dismiss")
     .map { event => AlarmDismissEvent(event.value1.get.toLong) }
-}
 
-object SleepAsAndroid {
   private[SleepAsAndroid] case class Message(event: String, value1: Option[String] = None, value2: Option[String] = None) derives ReadWriter
   case class AlarmRescheduledEvent(time: Option[Long]) {
     def activated: Boolean = time.nonEmpty
   }
   case class AlarmStartEvent(time: Long)
   case class AlarmDismissEvent(time: Long)
+
 }
+

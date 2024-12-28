@@ -3,8 +3,9 @@ package webapp
 
 import org.scalatra.{Route, ScalatraServlet, UrlGeneratorSupport}
 import MyDevices.*
-
 import controller.Controller
+
+import de.unruh.homeautomation.devices.SleepAsAndroid
 
 import scala.xml.NodeBuffer
 
@@ -13,6 +14,10 @@ class Webapp extends ScalatraServlet, UrlGeneratorSupport {
     case e: Throwable =>
       e.printStackTrace()
       Utils.stackTrace(e)
+  }
+
+  private val sleepAsAndroidWebhook = post("/webhooks/sleepasandroid") {
+    SleepAsAndroid.incomingWebhook(request.body)
   }
 
   private val bedroomLightToggle = get("/bedroom/light/toggle") {

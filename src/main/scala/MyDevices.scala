@@ -19,5 +19,5 @@ object MyDevices {
   val floodlightSide = TradfriBulb("zigbee2mqtt/floodlight_side")
   val blindsBedroom = TredansenBlind("zigbee2mqtt/blinds_bedroom", windowBedroom)
   val windows: Seq[OpenClosed & Description] = Seq(windowBedroom)
-  val sleepAsAndroid = SleepAsAndroid("SleepAsAndroid")
+  val sleepAsAndroid: SleepAsAndroid.type = SleepAsAndroid
 }
