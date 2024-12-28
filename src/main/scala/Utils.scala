@@ -1,5 +1,6 @@
 package de.unruh.homeautomation
 
+import monix.execution.Ack.Stop
 import monix.execution.ChannelType.MultiProducer
 import monix.execution.{Ack, Cancelable}
 import monix.reactive.{Observable, OverflowStrategy}
@@ -66,14 +67,21 @@ object Utils {
 
   class ImperativeObservable[A] {
     private val subscribers = ConcurrentLinkedDeque[Subscriber.Sync[A]]()
+
+    private def unsubscribe(subscriber: Subscriber[A]): Unit =
+      subscribers.remove(subscriber)
+
     val observable: Observable[A] = Observable.create(OverflowStrategy.DropOld(2), MultiProducer) { subscriber =>
       println(s"Adding subscriber $subscriber")
       subscribers.add(subscriber)
-      () => subscribers.remove(subscriber)
+      () => unsubscribe(subscriber)
     }
-
-    def publish(message: A): Unit = 
-      for (subscriber <- subscribers.iterator.asScala)
-        subscriber.onNext(message)
+    
+    def publish(message: A): Unit =
+      for (subscriber <- subscribers.iterator.asScala) {
+        val ack = subscriber.onNext(message)
+        if (ack == Stop)
+          unsubscribe(subscriber)
+      }
   }
 }
