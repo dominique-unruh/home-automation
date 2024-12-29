@@ -32,7 +32,7 @@ class SonoffThermostat(topic: String)(using mqtt: Mqtt)
 
   override def setTargetTemperature(temperature: Double): Unit =
     setRaw("occupied_heating_setpoint", temperature.toString)
-  
+
   override lazy val currentTemperature: Observable[Double] =
     state.map(_.local_temperature)
 

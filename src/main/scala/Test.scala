@@ -3,6 +3,8 @@ package de.unruh.homeautomation
 import MyDevices.{mqtt, *}
 import Utils.{onChange, peek}
 
+import de.unruh.homeautomation.controller.{Controller, ControllerBase}
+
 
 
 object Test {
@@ -14,12 +16,14 @@ object Test {
   
   def main(args: Array[String]): Unit = {
 
-    onChange(heatingBedroom.battery, println)
+    Controller.run()
+
+/*    onChange(heatingBedroom.battery, println)
 
     onChange(heatingBedroom.targetTemperature, println)
     onChange(heatingBedroom.currentTemperature, println)
 
     Thread.sleep(1000)
-    heatingBedroom.setTargetTemperature(19)
+    heatingBedroom.setTargetTemperature(18)*/
   }
 }
